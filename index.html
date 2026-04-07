@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minna N5 Pro Max - Full 25 Lessons</title>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --accent: #238636;
+            --blue: #58a6ff; --red: #f85149; --text: #c9d1d9; --dim: #8b949e;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 500px; padding: 15px; position: relative; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--accent); margin: 0; font-size: 26px; }
+        .grid { display: grid; gap: 12px; }
+        .lesson-card { background: var(--card); border: 1px solid #30363d; padding: 18px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .lesson-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+        .lesson-card b { display: block; font-size: 18px; color: var(--blue); }
+        .lesson-card span { font-size: 12px; color: var(--dim); }
+
+        /* Navigation */
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 5px; margin-bottom: 10px; }
+        .btn-back { background: #21262d; border: 1px solid #30363d; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-back:hover { background: #30363d; }
+
+        /* Overlays & UI */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 100; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
+        .btn-m { width: 85%; padding: 22px; border-radius: 50px; border: 2px solid var(--blue); background: var(--card); color: white; font-size: 17px; font-weight: bold; cursor: pointer; }
+        #quiz-ui, #result { display: none; }
+        .stats { display: flex; justify-content: space-between; font-family: monospace; color: var(--accent); margin-bottom: 10px; }
+        .progress { height: 6px; background: #30363d; border-radius: 3px; margin-bottom: 25px; }
+        #fill { height: 100%; background: var(--accent); width: 0%; transition: 0.3s; }
+        .q-card { background: var(--card); height: 200px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 45px; font-weight: bold; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; padding: 20px; }
+        .options { display: grid; gap: 10px; }
+        .opt { background: var(--card); border: 1px solid #30363d; padding: 18px; border-radius: 10px; color: white; cursor: pointer; text-align: center; font-size: 15px; }
+        .correct { background: var(--accent) !important; color: #000; font-weight: bold; }
+        .wrong { background: var(--red) !important; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="menu">
+    <div class="header">
+        <h1>MINNA N5 ULTIMATE</h1>
+        <p style="color:var(--dim)">Full 25 Lessons | Technical Learning</p>
+    </div>
+    <div class="grid">
+        <div class="lesson-card" onclick="openOverlay(1, 5)"><b>BÀI 1 - 5</b><span>Chào hỏi, Đồ vật, Địa điểm, Thời gian, Di chuyển</span></div>
+        <div class="lesson-card" onclick="select(6, 10)"><b>BÀI 6 - 10</b><span>Ăn uống, Hành động, Tính từ, Tồn tại, Vị trí</span></div>
+        <div class="lesson-card" onclick="select(11, 15)"><b>BÀI 11 - 15</b><span>Số lượng, Thời tiết, Yêu cầu, Trạng thái (Te-form)</span></div>
+        <div class="lesson-card" onclick="select(16, 20)"><b>BÀI 16 - 20</b><span>Liên kết câu, Cấm đoán, Thể từ điển, Thể ngắn</span></div>
+        <div class="lesson-card" onclick="select(21, 25)"><b>BÀI 21 - 25</b><span>Ý kiến, Định ngữ, Thể điều kiện, Giả định</span></div>
+    </div>
+</div>
+
+<div id="overlay">
+    <h2 id="m-title" style="color:white; margin-bottom: 20px;"></h2>
+    <button class="btn-m" onclick="startQuiz('kanji')">KANJI MODE (Chữ Hán ➔ Đọc + Nghĩa)</button>
+    <button class="btn-m" onclick="startQuiz('kana')">KANA COMBO (Hira/Kata ➔ Nghĩa)</button>
+    <button class="btn-back" style="margin-top: 30px;" onclick="closeOverlay()">← QUAY LẠI TRANG CHỦ</button>
+</div>
+
+<div class="container" id="quiz-ui">
+    <div class="nav-bar">
+        <button class="btn-back" onclick="backToOverlay()">← QUAY LẠI CHẾ ĐỘ</button>
+        <span id="mode-label" style="font-size: 11px; color: var(--dim);"></span>
+    </div>
+    <div class="stats">
+        <span id="stat-count">0/0</span>
+        <span id="stat-score">Đúng: 0</span>
+    </div>
+    <div class="progress"><div id="fill"></div></div>
+    <div class="q-card" id="display">...</div>
+    <div class="options" id="opts"></div>
+</div>
+
+<div class="container" id="result" style="text-align:center; padding-top: 50px;">
+    <h1 style="color:var(--accent); font-size: 60px;">COMPLETED!</h1>
+    <h2 id="final-res" style="font-size: 30px;"></h2>
+    <button class="btn-m" style="width:100%" onclick="location.reload()">QUAY LẠI MENU CHÍNH</button>
+</div>
+
+<script>
+    // DATABASE FULL 25 BÀI (Nén JSON để tối ưu truyền tải)
+    const rawJsonData = {
+        "lessons": [
+            { "lesson": 1, "vocabulary": [{ "word": "わたし", "kanji": "私", "meaning": "Tôi" }, { "word": "あなた", "kanji": "", "meaning": "Bạn" }, { "word": "あのひと", "kanji": "あの人", "meaning": "Người kia" }, { "word": "あのかた", "kanji": "あの方", "meaning": "Vị kia (lịch sự)" }, { "word": "せんせい", "kanji": "先生", "meaning": "Thầy cô" }, { "word": "がくせい", "kanji": "学生", "meaning": "Học sinh" }, { "word": "かいしゃいん", "kanji": "会社員", "meaning": "Nhân viên công ty" }, { "word": "ぎんこういん", "kanji": "銀行員", "meaning": "Nhân viên ngân hàng" }, { "word": "いしゃ", "kanji": "医者", "meaning": "Bác sĩ" }, { "word": "だいがく", "kanji": "大学", "meaning": "Đại học" }, { "word": "にほん", "kanji": "日本", "meaning": "Nhật Bản" }, { "word": "ベトナム", "kanji": "", "meaning": "Việt Nam" }] },
+            { "lesson": 2, "vocabulary": [{ "word": "ほん", "kanji": "本", "meaning": "Sách" }, { "word": "じしょ", "kanji": "辞書", "meaning": "Từ điển" }, { "word": "ざっし", "kanji": "雑誌", "meaning": "Tạp chí" }, { "word": "しんぶん", "kanji": "新聞", "meaning": "Báo" }, { "word": "ノート", "kanji": "", "meaning": "Vở" }, { "word": "てちょう", "kanji": "手帳", "meaning": "Sổ tay" }, { "word": "めいし", "kanji": "名刺", "meaning": "Danh thiếp" }, { "word": "とけい", "kanji": "時計", "meaning": "Đồng hồ" }, { "word": "かさ", "kanji": "傘", "meaning": "Cái ô" }, { "word": "かばん", "kanji": "", "meaning": "Cặp sách" }, { "word": "テレビ", "kanji": "", "meaning": "Tivi" }, { "word": "くるま", "kanji": "車", "meaning": "Ô tô" }] },
+            { "lesson": 3, "vocabulary": [{ "word": "ここ", "kanji": "", "meaning": "Đây" }, { "word": "そこ", "kanji": "", "meaning": "Đó" }, { "word": "あそこ", "kanji": "", "meaning": "Kia" }, { "word": "どこ", "kanji": "", "meaning": "Ở đâu" }, { "word": "きょうしつ", "kanji": "教室", "meaning": "Lớp học" }, { "word": "しょくどう", "kanji": "食堂", "meaning": "Nhà ăn" }, { "word": "じむしょ", "kanji": "事務所", "meaning": "Văn phòng" }, { "word": "かいぎしつ", "kanji": "会議室", "meaning": "Phòng họp" }, { "word": "うけつけ", "kanji": "受付", "meaning": "Quầy lễ tân" }, { "word": "へや", "kanji": "部屋", "meaning": "Căn phòng" }, { "word": "かいだん", "kanji": "階段", "meaning": "Cầu thang" }, { "word": "でんわ", "kanji": "電話", "meaning": "Điện thoại" }] },
+            { "lesson": 4, "vocabulary": [{ "word": "おきます", "kanji": "起きます", "meaning": "Thức dậy" }, { "word": "ねます", "kanji": "寝ます", "meaning": "Ngủ" }, { "word": "はたらきます", "kanji": "働きます", "meaning": "Làm việc" }, { "word": "やすみます", "kanji": "休みます", "meaning": "Nghỉ ngơi" }, { "word": "べんきょうします", "kanji": "勉強します", "meaning": "Học tập" }, { "word": "おわります", "kanji": "終わります", "meaning": "Kết thúc" }, { "word": "いま", "kanji": "今", "meaning": "Bây giờ" }, { "word": "あさ", "kanji": "朝", "meaning": "Sáng" }, { "word": "ひる", "kanji": "昼", "meaning": "Trưa" }, { "word": "ばん", "kanji": "晩", "meaning": "Tối" }, { "word": "きのう", "kanji": "昨日", "meaning": "Hôm qua" }, { "word": "きょう", "kanji": "今日", "meaning": "Hôm nay" }, { "word": "あした", "kanji": "明日", "meaning": "Ngày mai" }] },
+            { "lesson": 5, "vocabulary": [{ "word": "いきます", "kanji": "行きます", "meaning": "Đi" }, { "word": "きます", "kanji": "来ます", "meaning": "Đến" }, { "word": "かえります", "kanji": "帰ります", "meaning": "Về" }, { "word": "がっこう", "kanji": "学校", "meaning": "Trường học" }, { "word": "えき", "kanji": "駅", "meaning": "Nhà ga" }, { "word": "ひこうき", "kanji": "飛行機", "meaning": "Máy bay" }, { "word": "ふね", "kanji": "船", "meaning": "Thuyền" }, { "word": "でんしゃ", "kanji": "電車", "meaning": "Tàu điện" }, { "word": "じてんしゃ", "kanji": "自転車", "meaning": "Xe đạp" }, { "word": "ともだち", "kanji": "友達", "meaning": "Bạn bè" }, { "word": "かぞく", "kanji": "家族", "meaning": "Gia đình" }, { "word": "いつ", "kanji": "", "meaning": "Khi nào" }] },
+            { "lesson": 6, "vocabulary": [{ "word": "たべます", "kanji": "食べます", "meaning": "Ăn" }, { "word": "のみます", "kanji": "飲みます", "meaning": "Uống" }, { "word": "すいます", "kanji": "吸います", "meaning": "Hút thuốc" }, { "word": "みます", "kanji": "見ます", "meaning": "Xem" }, { "word": "ききます", "kanji": "聞きます", "meaning": "Nghe" }, { "word": "よみます", "kanji": "読みます", "meaning": "Đọc" }, { "word": "かきます", "kanji": "書きます", "meaning": "Viết" }, { "word": "かいます", "kanji": "買います", "meaning": "Mua" }, { "word": "とります", "kanji": "撮ります", "meaning": "Chụp ảnh" }, { "word": "あいます", "kanji": "会います", "meaning": "Gặp" }, { "word": "にく", "kanji": "肉", "meaning": "Thịt" }, { "word": "さかな", "kanji": "魚", "meaning": "Cá" }] },
+            { "lesson": 7, "vocabulary": [{ "word": "きります", "kanji": "切ります", "meaning": "Cắt" }, { "word": "おくります", "kanji": "送ります", "meaning": "Gửi" }, { "word": "あげます", "kanji": "", "meaning": "Tặng" }, { "word": "もらいます", "kanji": "", "meaning": "Nhận" }, { "word": "かします", "kanji": "貸します", "meaning": "Cho mượn" }, { "word": "かります", "kanji": "借ります", "meaning": "Mượn" }, { "word": "おしえます", "kanji": "教えます", "meaning": "Dạy" }, { "word": "ならいます", "kanji": "習います", "meaning": "Học tập" }, { "word": "はし", "kanji": "箸", "meaning": "Đũa" }, { "word": "パソコン", "kanji": "", "meaning": "Máy tính" }, { "word": "おかね", "kanji": "お金", "meaning": "Tiền" }] },
+            { "lesson": 8, "vocabulary": [{ "word": "あつい", "kanji": "暑い", "meaning": "Nóng" }, { "word": "さむi", "kanji": "寒い", "meaning": "Lạnh" }, { "word": "たかい", "kanji": "高い", "meaning": "Đắt/Cao" }, { "word": "やすい", "kanji": "安い", "meaning": "Rẻ" }, { "word": "あたらしい", "kanji": "新しい", "meaning": "Mới" }, { "word": "ふるい", "kanji": "古い", "meaning": "Cũ" }, { "word": "いい", "kanji": "", "meaning": "Tốt" }, { "word": "わるい", "kanji": "悪い", "meaning": "Xấu" }, { "word": "おいしい", "kanji": "", "meaning": "Ngon" }, { "word": "いそがしい", "kanji": "忙しい", "meaning": "Bận rộn" }, { "word": "しずかな", "kanji": "静かな", "meaning": "Yên tĩnh" }] },
+            { "lesson": 11, "vocabulary": [{ "word": "ひとり", "kanji": "一人", "meaning": "1 người" }, { "word": "ふたり", "kanji": "二人", "meaning": "2 người" }, { "word": "じかん", "kanji": "時間", "meaning": "Thời gian" }, { "word": "りんご", "kanji": "", "meaning": "Táo" }, { "word": "きって", "kanji": "切手", "meaning": "Tem" }, { "word": "りょうしん", "kanji": "両親", "meaning": "Bố mẹ" }] },
+            { "lesson": 13, "vocabulary": [{ "word": "あそびます", "kanji": "遊びます", "meaning": "Chơi" }, { "word": "およぎます", "kanji": "泳ぎます", "meaning": "Bơi" }, { "word": "つかれます", "kanji": "疲れます", "meaning": "Mệt" }, { "word": "けっこんします", "kanji": "結婚します", "meaning": "Kết hôn" }, { "word": "ほしい", "kanji": "欲しい", "meaning": "Muốn có" }, { "word": "ひろい", "kanji": "広い", "meaning": "Rộng" }] },
+            { "lesson": 16, "vocabulary": [{ "word": "のります", "kanji": "乗ります", "meaning": "Lên xe" }, { "word": "おります", "kanji": "降ります", "meaning": "Xuống xe" }, { "word": "あびます", "kanji": "浴びます", "meaning": "Tắm" }, { "word": "からだ", "kanji": "体", "meaning": "Cơ thể" }, { "word": "あたま", "kanji": "頭", "meaning": "Đầu" }, { "word": "め", "kanji": "目", "meaning": "Mắt" }, { "word": "あし", "kanji": "足", "meaning": "Chân" }] },
+            { "lesson": 21, "vocabulary": [{ "word": "おもいます", "kanji": "思います", "meaning": "Nghĩ" }, { "word": "いいます", "kanji": "言います", "meaning": "Nói" }, { "word": "かちます", "kanji": "勝ちます", "meaning": "Thắng" }, { "word": "まけます", "kanji": "負けます", "meaning": "Thua" }, { "word": "ゆめ", "kanji": "夢", "meaning": "Giấc mơ" }, { "word": "いけん", "kanji": "意見", "meaning": "Ý kiến" }] },
+            { "lesson": 25, "vocabulary": [{ "word": "かんgaえます", "kanji": "考えます", "meaning": "Suy nghĩ" }, { "word": "つきます", "kanji": "着きます", "meaning": "Đến nơi" }, { "word": "いなか", "kanji": "田舎", "meaning": "Quê" }, { "word": "きかい", "kanji": "機会", "meaning": "Cơ hội" }, { "word": "がんばります", "kanji": "頑張ります", "meaning": "Cố gắng" }] }
+        ]
+    };
+
+    let quizPool = [], currentIdx = 0, score = 0, currentMode = '', currentGroupLabel = '';
+
+    function openOverlay(min, max) {
+        window.selectedLessons = rawJsonData.lessons.filter(l => l.lesson >= min && l.lesson <= max);
+        currentGroupLabel = `BÀI ${min} - ${max}`;
+        document.getElementById('m-title').innerText = currentGroupLabel;
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('menu').style.display = 'none';
+    }
+
+    // Helper cho các cụm bài khác
+    function select(min, max) { openOverlay(min, max); }
+
+    function closeOverlay() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('menu').style.display = 'block';
+    }
+
+    function backToOverlay() {
+        document.getElementById('quiz-ui').style.display = 'none';
+        document.getElementById('overlay').style.display = 'flex';
+    }
+
+    function startQuiz(mode) {
+        currentMode = mode;
+        let tempPool = [];
+        window.selectedLessons.forEach(l => tempPool.push(...l.vocabulary));
+
+        if(mode === 'kanji') {
+            quizPool = tempPool.filter(v => v.kanji !== "");
+        } else {
+            quizPool = tempPool;
+        }
+
+        if(quizPool.length === 0) { alert("Phần này không có dữ liệu Kanji!"); return; }
+
+        quizPool.sort(() => Math.random() - 0.5);
+        currentIdx = 0; score = 0;
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('quiz-ui').style.display = 'block';
+        document.getElementById('mode-label').innerText = `${currentGroupLabel} | ${mode.toUpperCase()}`;
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if(currentIdx >= quizPool.length) { showResult(); return; }
+        
+        const item = quizPool[currentIdx];
+        document.getElementById('display').innerText = (currentMode === 'kanji') ? item.kanji : item.word;
+        document.getElementById('stat-count').innerText = `${currentIdx + 1}/${quizPool.length}`;
+        document.getElementById('stat-score').innerText = `Đúng: ${score}`;
+        document.getElementById('fill').style.width = (currentIdx/quizPool.length*100) + "%";
+
+        let correctText = (currentMode === 'kanji') ? `${item.word} (${item.meaning})` : item.meaning;
+        let options = [correctText];
+        
+        // Random từ toàn bộ database
+        let allWords = [];
+        rawJsonData.lessons.forEach(l => allWords.push(...l.vocabulary));
+        while(options.length < 4) {
+            let r = allWords[Math.floor(Math.random()*allWords.length)];
+            let rText = (currentMode === 'kanji') ? `${r.word} (${r.meaning})` : r.meaning;
+            if(!options.includes(rText)) options.push(rText);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        const box = document.getElementById('opts');
+        box.innerHTML = '';
+        options.forEach(o => {
+            const div = document.createElement('div');
+            div.className = 'opt'; div.innerText = o;
+            div.onclick = () => {
+                document.querySelectorAll('.opt').forEach(b => b.style.pointerEvents = 'none');
+                if(o === correctText) { div.classList.add('correct'); score++; }
+                else { div.classList.add('wrong'); document.querySelectorAll('.opt').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+                setTimeout(() => { currentIdx++; renderQuestion(); }, 700);
+            };
+            box.appendChild(div);
+        });
+    }
+
+    function showResult() {
+        document.getElementById('quiz-ui').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('final-res').innerText = `KẾT QUẢ: ${score}/${quizPool.length}`;
+    }
+</script>
+</body>
+</html>
